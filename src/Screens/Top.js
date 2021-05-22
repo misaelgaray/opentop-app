@@ -1,14 +1,20 @@
 import React, {Component} from 'react';
 import {Navigation} from 'react-native-navigation';
-import {Text, StyleSheet, SafeAreaView, View, TouchableOpacity, Touchable} from 'react-native';
-import { ListItem, Avatar, Badge } from 'react-native-elements';
+import {Text, StyleSheet, SafeAreaView, View, TouchableOpacity, ActivityIndicator} from 'react-native';
+import { ListItem, Avatar, Badge, Icon} from 'react-native-elements';
 import {connect} from 'react-redux';
 import {setTop} from '../store/actions';
 import DraggableFlatList from "react-native-draggable-flatlist";
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
+import firestore from '@react-native-firebase/firestore';
 import _ from 'lodash';
 
 class Top extends Component {
+
+    state = {
+        isPositionChanged : false,
+        savingPositions : false,
+    };
 
     constructor(props) {
       super(props);
@@ -16,56 +22,58 @@ class Top extends Component {
     }
 
     navigationButtonPressed({buttonId}) {
-        if (buttonId === 'Back') {
-            Navigation.pop(this.props.componentId);
-        } 
-
-        if (buttonId === 'Add') {
-            const lastPositionIndex = this.props.positions ? this.props.positions.length  : 0;
-            Promise.all([
-                Icon.getImageSource('arrow-back-ios', 30),
-                Icon.getImageSource('save', 30),
-            ]).then(data => {
-                Navigation.showModal({
-                    stack: {
-                        children: [
-                            {
-                                component: {
-                                    name: 'CreatePosition',
-                                    passProps: {
-                                        lastPositionIndex : lastPositionIndex,
-                                        top : this.props.top,
-                                        positions : this.props.positions,
-                                     },
-                                    options: {
-                                        topBar: {
-                                            title: {
-                                                text: 'New Position',
+        if (!this.state.isPositionChanged && !this.state.savingPositions) {
+            if (buttonId === 'Back') {
+                Navigation.pop(this.props.componentId);
+            } 
+    
+            if (buttonId === 'Add') {
+                const lastPositionIndex = this.props.positions ? this.props.positions.length  : 0;
+                Promise.all([
+                    MaterialIcon.getImageSource('arrow-back-ios', 30),
+                    MaterialIcon.getImageSource('save', 30),
+                ]).then(data => {
+                    Navigation.showModal({
+                        stack: {
+                            children: [
+                                {
+                                    component: {
+                                        name: 'CreatePosition',
+                                        passProps: {
+                                            lastPositionIndex : lastPositionIndex,
+                                            top : this.props.top,
+                                            positions : this.props.positions,
+                                         },
+                                        options: {
+                                            topBar: {
+                                                title: {
+                                                    text: 'New Position',
+                                                },
+                                                leftButtons: [
+                                                    {
+                                                        id: 'Back',
+                                                        icon: data[0],
+                                                        color: 'white',
+                                                        disabledColor: 'gray',
+                                                    },
+                                                ],
+                                                rightButtons: [
+                                                    {
+                                                        id: 'Save',
+                                                        icon: data[1],
+                                                        color: 'white',
+                                                        disabledColor: 'gray',
+                                                    },
+                                                ], 
                                             },
-                                            leftButtons: [
-                                                {
-                                                    id: 'Back',
-                                                    icon: data[0],
-                                                    color: 'white',
-                                                    disabledColor: 'gray',
-                                                },
-                                            ],
-                                            rightButtons: [
-                                                {
-                                                    id: 'Save',
-                                                    icon: data[1],
-                                                    color: 'white',
-                                                    disabledColor: 'gray',
-                                                },
-                                            ], 
                                         },
                                     },
                                 },
-                            },
-                        ],
-                    },
+                            ],
+                        },
+                    });
                 });
-            });
+            }
         }
     }
 
@@ -77,7 +85,7 @@ class Top extends Component {
                         {
                             item.img ? 
                                 <Avatar size="medium" source={{uri: item.img}} rounded/>:
-                                <Avatar size="medium" title={item.name[0]} rounded/>
+                                <Avatar size="medium" title={item.name[0]} titleStyle={{color: '#fca903'}} rounded containerStyle={{backgroundColor: '#e3e3e3e3'}}/>
                         }
                         <Badge value={item.position} containerStyle={{ position: 'absolute', top: -8, left: -8 }} badgeStyle={{ height: 24, width: 24, borderRadius: 12, backgroundColor: '#fca903'}}/>
                     </View>
@@ -95,8 +103,33 @@ class Top extends Component {
             return item;
         });
         newTop.positions = newPositions;
-        this.props.setTop(newTop);
+        this.setState({
+            isPositionChanged : true,
+        }, () => this.props.setTop(newTop));
     };
+
+    savePosition(topId, positions, callback){
+        firestore()
+            .collection('tops')
+            .doc(topId)
+            .update({
+                positions : positions
+            })
+            .then(()=>callback())
+            .catch(error => console.log(error));
+    }
+
+    handleSavePositions = () => {
+        if (this.props.top.id) {
+            this.setState({
+                savingPositions : true,
+            }, () => {
+                this.savePosition(this.props.top.id, this.props.positions, () => {
+                    this.setState({ isPositionChanged : false, savingPositions : false });
+                });
+            });
+        }
+    }
 
     render() {
         const positions = this.props.positions ? this.props.positions.sort((a,b) => a.position - b.position).map(item => ({...item, key: 'item-'+item.position})) : null;
@@ -114,6 +147,25 @@ class Top extends Component {
                     onDragEnd={({ data }) => this.handleDragEnd(data)}
                 /> : 
                 <Text>No Items In Top</Text>
+            }
+            {
+                this.state.isPositionChanged ? 
+                    <TouchableOpacity style={styles.savePositionsBtn} onPress={this.handleSavePositions} disabled={this.state.savingPositions}>
+                        {
+                            this.state.savingPositions ?
+                                <View>
+                                    <Text style={{color: "#fca903"}}>Saving</Text>
+                                    <ActivityIndicator size="large" color="#fca903" /> 
+                                </View>:
+                                <Icon 
+                                    name='save'
+                                    color='#fca903'
+                                    type='material'
+                                    reverse
+                                    size={32}
+                                />
+                        }
+                    </TouchableOpacity> : null
             }
           </View>
         </SafeAreaView>;
@@ -144,6 +196,11 @@ const styles = StyleSheet.create({
     itemName : {
         fontSize: 18,
         fontFamily: 'Roboto',
+    },
+    savePositionsBtn : {
+        position: 'absolute',
+        right : 20,
+        bottom: 20,
     }
 });
 

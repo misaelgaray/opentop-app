@@ -121,7 +121,7 @@ class Home extends Component {
                     {
                         item.img ? 
                             <Avatar size="medium" source={{uri: item.img}} rounded/>:
-                            <Avatar size="medium" title={item.name[0]} rounded/>
+                            <Avatar size="medium" title={item.name[0]} titleStyle={{color: '#fca903'}} rounded containerStyle={{backgroundColor: '#e3e3e3e3'}}/>
                     }
                     <Badge value={item.position} containerStyle={{ position: 'absolute', top: -8, left: -8 }} badgeStyle={{ height: 24, width: 24, borderRadius: 12, backgroundColor: '#fca903'}}/>
                 </View>;
