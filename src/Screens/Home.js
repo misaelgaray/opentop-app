@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import {Navigation} from 'react-native-navigation';
-import {Text, StyleSheet, SafeAreaView, View, TouchableOpacity, Touchable} from 'react-native';
+import {Text, StyleSheet, SafeAreaView, View, TouchableOpacity, ActivityIndicator} from 'react-native';
 import { ListItem, Avatar, Badge } from 'react-native-elements';
 import {connect} from 'react-redux';
 import {setTops} from '../store/actions';
@@ -146,7 +146,10 @@ class Home extends Component {
                           </ListItem>
                       </TouchableOpacity>;
                 }) : 
-                <Text>Loading</Text>
+                <View style={styles.loaderContainer}>
+                    <Text style={{color: "#fca903"}}>Loading Tops</Text>
+                    <ActivityIndicator size="large" color="#fca903" /> 
+                </View>
             }
           </View>
         </SafeAreaView>;
@@ -173,6 +176,13 @@ const styles = StyleSheet.create({
       flex: 1,
       width: '100%',
       height: '100%',
+    },
+    loaderContainer : {
+        flex: 1,
+        width: '100%',
+        height: '100%',
+        alignItems: 'center',
+        justifyContent: 'center',
     }
 });
 

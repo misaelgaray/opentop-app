@@ -1,50 +1,12 @@
 import React, {Component} from 'react';
 import {Navigation} from 'react-native-navigation';
-import { TouchableOpacity, Text, StyleSheet, SafeAreaView} from 'react-native';
+import { TouchableOpacity, Text, StyleSheet, SafeAreaView, View} from 'react-native';
 import { Input } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {connect} from 'react-redux';
 import {setUser} from '../store/actions';
 import auth from '@react-native-firebase/auth';
 import _ from 'lodash';
-
-const styles = StyleSheet.create({
-    root: {
-        flex: 1,
-        backgroundColor: 'white',
-        justifyContent: 'center',
-        alignItems: 'center'
-    },
-    container: {
-        flex: 1,
-        width: '80%',
-    },
-    titleText: {
-        fontSize: 26,
-        fontWeight: 'bold',
-        marginBottom: 20
-    },    
-    loginInput : {
-        borderWidth: 2,
-        borderColor: '#e3e3e3e3',
-        borderRadius: 10,
-        marginBottom: 10,
-        marginTop: 10,
-        width: '80%',
-    },
-    buttonLogin : {
-        marginTop: 10,
-        width: '80%',
-        backgroundColor: '#fca903',
-        padding: 10,
-        borderRadius: 10,
-    },
-    buttonText : {
-        color: 'white',
-        textAlign: 'center',
-        fontSize: 16,
-    },
-});
 
 class Login extends Component {
 
@@ -101,8 +63,9 @@ class Login extends Component {
     componentDidMount(){
         auth().onAuthStateChanged(this.onAuthStateChanged);
         if (this.props.user) {
-            this.setHomeAsRoot();
-            //this.props.setUser(null);
+			setTimeout(() => {
+				this.setHomeAsRoot();
+			}, 3000);
         }
     }
     
@@ -148,31 +111,85 @@ class Login extends Component {
     };
 
     render(){
-        return <SafeAreaView style={styles.root}>
-            <Text style={styles.titleText}>OPEN TOP</Text>
-            <Input
-                containerStyle={{ width: '80%'}}
-                inputContainerStyle={{ borderColor: '#e3e3e3e3'}}
-                placeholder='example_08'
-                value={this.state.email}
-                onChangeText={values => this.setState({email: values})}
-                label='Your username'
-                leftIcon={{ type: 'material', name: 'account-circle', color: '#e3e3e3e3' }} />
-            <Input
-                containerStyle={{ width: '80%'}}
-                inputContainerStyle={{ borderColor: '#e3e3e3e3'}}
-                placeholder='Password'
-                label='Password'
-                value={this.state.password}
-                onChangeText={values => this.setState({password: values})}
-                leftIcon={{ type: 'material', name: 'lock', color: '#e3e3e3e3' }} 
-                secureTextEntry />
-            <TouchableOpacity style={styles.buttonLogin} onPress={this.handleLoginBtn} disabled={!this.state.email || !this.state.password}>
-                <Text style={styles.buttonText}>Login</Text>
-            </TouchableOpacity>
-        </SafeAreaView>;
+        return !this.props.user ?
+			<SafeAreaView style={styles.root}>
+				<Text style={styles.titleText}>OPEN TOP</Text>
+				<Input
+					containerStyle={{ width: '80%'}}
+					inputContainerStyle={{ borderColor: '#e3e3e3e3'}}
+					placeholder='example_08'
+					value={this.state.email}
+					onChangeText={values => this.setState({email: values})}
+					label='Your username'
+					leftIcon={{ type: 'material', name: 'account-circle', color: '#e3e3e3e3' }} />
+				<Input
+					containerStyle={{ width: '80%'}}
+					inputContainerStyle={{ borderColor: '#e3e3e3e3'}}
+					placeholder='Password'
+					label='Password'
+					value={this.state.password}
+					onChangeText={values => this.setState({password: values})}
+					leftIcon={{ type: 'material', name: 'lock', color: '#e3e3e3e3' }} 
+					secureTextEntry />
+				<TouchableOpacity style={styles.buttonLogin} onPress={this.handleLoginBtn} disabled={!this.state.email || !this.state.password}>
+					<Text style={styles.buttonText}>Login</Text>
+				</TouchableOpacity>
+			</SafeAreaView> : 
+			<View style={styles.splashContainer}>
+				<Text style={styles.splashTitle}>OPEN TOP</Text>
+			</View>;
     }
 }
+
+const styles = StyleSheet.create({
+    root: {
+        flex: 1,
+        backgroundColor: 'white',
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    container: {
+        flex: 1,
+        width: '80%',
+    },
+    titleText: {
+        fontSize: 26,
+        fontWeight: 'bold',
+        marginBottom: 20
+    },    
+    loginInput : {
+        borderWidth: 2,
+        borderColor: '#e3e3e3e3',
+        borderRadius: 10,
+        marginBottom: 10,
+        marginTop: 10,
+        width: '80%',
+    },
+    buttonLogin : {
+        marginTop: 10,
+        width: '80%',
+        backgroundColor: '#fca903',
+        padding: 10,
+        borderRadius: 10,
+    },
+    buttonText : {
+        color: 'white',
+        textAlign: 'center',
+        fontSize: 16,
+    },
+	splashContainer : {
+		backgroundColor: '#fca903',
+		flex: 1,
+		justifyContent: 'center',
+		alignItems: 'center',
+	},
+	splashTitle : {
+		color: 'white',
+		fontSize: 28,
+		fontWeight: 'bold',
+		fontFamily: 'Roboto'
+	}
+});
 
 const mapStateToProps = (state, ownProps) => {
     return {
