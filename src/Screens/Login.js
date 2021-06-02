@@ -19,6 +19,7 @@ class Login extends Component {
     setHomeAsRoot = () => {
         Promise.all([
             Icon.getImageSource('add', 30),
+			Icon.getImageSource('logout', 30),
         ]).then(results => {
             Navigation.setDefaultOptions({
                 topBar: {
@@ -48,6 +49,14 @@ class Login extends Component {
                                                     color: 'white',
                                                     disabledColor: 'gray',
                                                 },
+                                            ],
+											leftButtons: [
+                                                {
+                                                    id: 'Logout',
+                                                    icon: results[1],
+                                                    color: 'white',
+                                                    disabledColor: 'gray',
+                                                },
                                             ], 
                                         }
                                     }
@@ -60,13 +69,41 @@ class Login extends Component {
         });
     };
 
+	setLoginAsRoot = () => {
+		Navigation.setDefaultOptions({
+			topBar: {
+				background: {
+					color: '#fca903',
+				},
+				title: {
+					fontSize: 20,
+					color: 'white',
+					alignment: 'center',
+				},
+			},
+			layout: {
+				orientation: ['portrait'],
+			},
+		});
+		Navigation.events().registerAppLaunchedListener(() => {
+			Navigation.setRoot({
+				root: {
+					component: {
+						name: 'Login'
+					}
+				},
+			});
+		});
+	};
+
     componentDidMount(){
         auth().onAuthStateChanged(this.onAuthStateChanged);
+		console.log("COMPONENT MOUNT");
         if (this.props.user) {
-			setTimeout(() => {
-				this.setHomeAsRoot();
-			}, 3000);
-        }
+			this.setHomeAsRoot();
+        } else {
+			this.setLoginAsRoot();
+		}
     }
     
     handleLoginBtn = () => {
@@ -77,17 +114,17 @@ class Login extends Component {
                 })
                 .catch(error => {
                     if (error.code === 'auth/email-already-in-use') {
-                    console.log('That email address is already in use!');
+                    	console.log('That email address is already in use!');
                     }
 
                     if (error.code === 'auth/invalid-email') {
-                    console.log('That email address is invalid!');
+                    	console.log('That email address is invalid!');
                     }
 
                     console.error(error);
                 });
         } else {
-            auth().signInWithEmailAndPassword(this.state.email, this.state.password);
+            auth().signInWithEmailAndPassword(this.state.email, this.state.password).then(() => console.log("LOGIN")).catch((error) => console.log(error));
         }
     
     };
@@ -95,11 +132,13 @@ class Login extends Component {
     componentDidUpdate(){
         if (this.props.user) {
             this.setHomeAsRoot();
-        }
+        } else {
+			this.setLoginAsRoot();
+		}
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        return !_.isEqual(nextProps, this.props);
+        return !_.isEqual(nextProps, this.props) || !_.isEqual(nextState, this.state);
     }
 
     onAuthStateChanged = (user) => {
@@ -193,7 +232,7 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = (state, ownProps) => {
     return {
-        user: state.userReducer,
+        user: state.userReducer && state.userReducer.user ? state.userReducer.user : null,
     };
 };
 

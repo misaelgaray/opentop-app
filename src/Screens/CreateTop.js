@@ -6,7 +6,6 @@ import {connect} from 'react-redux';
 import {setTops} from '../store/actions';
 import _ from 'lodash';
 import uuid from 'react-native-uuid';
-import storage from '@react-native-firebase/storage';
 import firestore from '@react-native-firebase/firestore';
 
 class CreateTop extends Component {

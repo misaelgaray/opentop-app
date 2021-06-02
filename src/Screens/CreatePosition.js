@@ -9,6 +9,56 @@ import uuid from 'react-native-uuid';
 import {launchImageLibrary} from 'react-native-image-picker';
 import storage from '@react-native-firebase/storage';
 import firestore from '@react-native-firebase/firestore';
+import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
+
+export const openCreatePosition = (top, positions, lastPositionIndex, isEdit, position) => {
+    Promise.all([
+        MaterialIcon.getImageSource('arrow-back-ios', 30),
+        MaterialIcon.getImageSource('save', 30),
+    ]).then(data => {
+        Navigation.showModal({
+            stack: {
+                children: [
+                    {
+                        component: {
+                            name: 'CreatePosition',
+                            passProps: {
+                                lastPositionIndex : lastPositionIndex,
+                                top : top,
+                                positions : positions,
+                                isEdit : isEdit,
+                                position: position,
+                            },
+                            options: {
+                                topBar: {
+                                    title: {
+                                        text: 'New Position',
+                                    },
+                                    leftButtons: [
+                                        {
+                                            id: 'Back',
+                                            icon: data[0],
+                                            color: 'white',
+                                            disabledColor: 'gray',
+                                        },
+                                    ],
+                                    rightButtons: [
+                                        {
+                                            id: 'Save',
+                                            icon: data[1],
+                                            color: 'white',
+                                            disabledColor: 'gray',
+                                        },
+                                    ], 
+                                },
+                            },
+                        },
+                    },
+                ],
+            },
+        });
+    });
+};
 
 class CreatePosition extends Component {
 

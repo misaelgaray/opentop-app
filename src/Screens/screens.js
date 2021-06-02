@@ -9,9 +9,9 @@ import CreatePosition from './CreatePosition';
 import CreateTop from './CreateTop';
 
 export function registerScreens() {
-    Navigation.registerComponentWithRedux('Login', () => Login, Provider, store);
-    Navigation.registerComponentWithRedux('Home', () => Home, Provider, store);
+    Navigation.registerComponentWithRedux('Login', () => gestureHandlerRootHOC(Login), Provider, store);
+    Navigation.registerComponentWithRedux('Home', () => gestureHandlerRootHOC(Home), Provider, store);
     Navigation.registerComponentWithRedux('Top', () => gestureHandlerRootHOC(Top), Provider, store);
-    Navigation.registerComponentWithRedux('CreatePosition', () => CreatePosition, Provider, store);
-    Navigation.registerComponentWithRedux('CreateTop', () => CreateTop, Provider, store);
+    Navigation.registerComponentWithRedux('CreatePosition', () => gestureHandlerRootHOC(CreatePosition), Provider, store);
+    Navigation.registerComponentWithRedux('CreateTop', () => gestureHandlerRootHOC(CreateTop), Provider, store);
 }

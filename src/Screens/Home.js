@@ -6,6 +6,7 @@ import {connect} from 'react-redux';
 import {setTops} from '../store/actions';
 import firestore from '@react-native-firebase/firestore';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import auth from '@react-native-firebase/auth';
 
 class Home extends Component {
 
@@ -72,6 +73,12 @@ class Home extends Component {
                         ],
                     },
                 });
+            });
+        }
+
+        if (buttonId === "Logout") {
+            auth().signOut().then(() => { 
+                Navigation.pop(this.props.componentId);    
             });
         }
     }

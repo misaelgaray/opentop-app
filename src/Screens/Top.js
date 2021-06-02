@@ -5,9 +5,9 @@ import { ListItem, Avatar, Badge, Icon} from 'react-native-elements';
 import {connect} from 'react-redux';
 import {setTop} from '../store/actions';
 import DraggableFlatList from "react-native-draggable-flatlist";
-import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import firestore from '@react-native-firebase/firestore';
 import _ from 'lodash';
+import { openCreatePosition } from './CreatePosition';
 
 class Top extends Component {
 
@@ -29,57 +29,19 @@ class Top extends Component {
     
             if (buttonId === 'Add') {
                 const lastPositionIndex = this.props.positions ? this.props.positions.length  : 0;
-                Promise.all([
-                    MaterialIcon.getImageSource('arrow-back-ios', 30),
-                    MaterialIcon.getImageSource('save', 30),
-                ]).then(data => {
-                    Navigation.showModal({
-                        stack: {
-                            children: [
-                                {
-                                    component: {
-                                        name: 'CreatePosition',
-                                        passProps: {
-                                            lastPositionIndex : lastPositionIndex,
-                                            top : this.props.top,
-                                            positions : this.props.positions,
-                                         },
-                                        options: {
-                                            topBar: {
-                                                title: {
-                                                    text: 'New Position',
-                                                },
-                                                leftButtons: [
-                                                    {
-                                                        id: 'Back',
-                                                        icon: data[0],
-                                                        color: 'white',
-                                                        disabledColor: 'gray',
-                                                    },
-                                                ],
-                                                rightButtons: [
-                                                    {
-                                                        id: 'Save',
-                                                        icon: data[1],
-                                                        color: 'white',
-                                                        disabledColor: 'gray',
-                                                    },
-                                                ], 
-                                            },
-                                        },
-                                    },
-                                },
-                            ],
-                        },
-                    });
-                });
+                openCreatePosition(this.props.top, this.props.positions, lastPositionIndex, false, null);
             }
         }
     }
 
+    editPosition = (position) => {
+        const lastPositionIndex = this.props.positions ? this.props.positions.length  : 0;
+        openCreatePosition(this.props.top, this.props.positions, lastPositionIndex, false, position);
+    };
+
     renderTop = (data) => {
       const {item, index, drag, isActive} = data;
-      return  <TouchableOpacity onLongPress={drag}>
+      return  <TouchableOpacity onLongPress={drag} onPress={() => this.editPosition(item)}>
                   <ListItem bottomDivider>
                     <View>
                         {
